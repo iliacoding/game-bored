@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GAME BORED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --felt:#1B4D3E;
+  --felt-dark:#143C30;
+  --ink:#131F19;
+  --cream:#F5EEDC;
+  --cream-dim:#E9DFC8;
+  --red:#E24A3B;
+  --mustard:#EFB63C;
+  --blue:#3E8FCB;
+  --orange:#E8802F;
+  --purple:#9A66D3;
+  --shadow:4px 4px 0 var(--ink);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:'Archivo',sans-serif;
+  background:var(--felt);
+  color:var(--ink);
+  overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;
+}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:16px 16px 32px;}
+
+/* ---------- shared ---------- */
+h1,h2,h3,.disp{font-family:'Archivo Black',sans-serif;letter-spacing:-0.5px;line-height:1.05;}
+.mono{font-family:'Space Mono',monospace;}
+.screen{display:none;flex-direction:column;gap:14px;flex:1;}
+.screen.on{display:flex;}
+.card{
+  background:var(--cream);
+  border:3px solid var(--ink);
+  box-shadow:var(--shadow);
+  border-radius:14px;
+  padding:16px;
+}
+button{
+  font-family:'Archivo',sans-serif;
+  font-weight:700;
+  font-size:16px;
+  border:3px solid var(--ink);
+  border-radius:12px;
+  background:var(--cream);
+  color:var(--ink);
+  padding:14px 18px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:transform .05s, box-shadow .05s;
+}
+button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink);}
+button:focus-visible{outline:3px dashed var(--cream);outline-offset:3px;}
+button.small{padding:8px 12px;font-size:14px;box-shadow:3px 3px 0 var(--ink);border-radius:10px;}
+button.small:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink);}
+button.red{background:var(--red);color:var(--cream);}
+button.mustard{background:var(--mustard);}
+button.blue{background:var(--blue);color:var(--cream);}
+button.orange{background:var(--orange);color:var(--cream);}
+button.purple{background:var(--purple);color:var(--cream);}
+button.ink{background:var(--ink);color:var(--cream);}
+button.wfull{width:100%;}
+button:disabled{opacity:.45;pointer-events:none;}
+.row{display:flex;gap:10px;}
+.row>*{flex:1;}
+.eyebrow{
+  font-family:'Space Mono',monospace;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:2px;
+}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}
+.backbtn{flex:0 0 auto;width:auto;}
+.gamechip{
+  display:inline-block;padding:4px 12px;border:3px solid var(--ink);border-radius:999px;
+  font-family:'Space Mono',monospace;font-weight:700;font-size:12px;letter-spacing:1px;
+  box-shadow:3px 3px 0 var(--ink);text-transform:uppercase;
+}
+.big-num{font-family:'Space Mono',monospace;font-weight:700;font-size:64px;text-align:center;line-height:1;}
+.hint{font-size:13px;color:#4d5c53;line-height:1.45;font-weight:500;}
+.cream-text{color:var(--cream);}
+
+/* ---------- home ---------- */
+.logo-wrap{padding:8px 0 4px;}
+.logo{
+  color:var(--cream);font-size:44px;
+  text-shadow:4px 4px 0 var(--ink);
+}
+.logo .flip{display:inline-block;color:var(--mustard);}
+.sub{color:var(--cream-dim);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:6px;font-family:'Space Mono',monospace;}
+.gamegrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.gcard{
+  border:3px solid var(--ink);border-radius:14px;box-shadow:var(--shadow);
+  padding:16px 14px;display:flex;flex-direction:column;gap:8px;min-height:118px;
+  cursor:pointer;transition:transform .05s, box-shadow .05s;text-align:left;
+}
+.gcard:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink);}
+.gcard h3{font-size:19px;}
+.gcard .eyebrow{opacity:.85;}
+.gcard p{font-size:12.5px;font-weight:600;line-height:1.35;opacity:.92;}
+.g-blue{background:var(--blue);color:var(--cream);}
+.g-mustard{background:var(--mustard);color:var(--ink);}
+.g-red{background:var(--red);color:var(--cream);}
+.g-orange{background:var(--orange);color:var(--cream);}
+.g-purple{background:var(--purple);color:var(--cream);}
+.g-cream{background:var(--cream);color:var(--ink);}
+
+/* ---------- players ---------- */
+.plist{display:flex;flex-direction:column;gap:10px;}
+.prow{
+  display:flex;align-items:center;gap:10px;background:var(--cream);
+  border:3px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);
+  padding:10px 12px;
+}
+.pname{font-weight:700;font-size:17px;flex:1;}
+.pscore{
+  font-family:'Space Mono',monospace;font-weight:700;font-size:15px;
+  background:var(--mustard);border:2.5px solid var(--ink);border-radius:999px;
+  min-width:44px;text-align:center;padding:4px 8px;
+}
+.pdel{flex:0 0 auto;width:auto;padding:6px 12px;font-size:14px;}
+.addrow{display:flex;gap:10px;}
+.addrow input{
+  flex:1;font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;
+  border:3px solid var(--ink);border-radius:12px;padding:12px 14px;
+  background:var(--cream);box-shadow:var(--shadow);
+}
+.addrow input:focus{outline:none;background:#fff;}
+.addrow button{flex:0 0 auto;width:auto;}
+
+/* ---------- wavelength dial ---------- */
+.dialwrap{position:relative;width:100%;}
+.dialwrap svg{width:100%;height:auto;display:block;touch-action:none;}
+.spectrum-labels{display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-top:6px;gap:12px;}
+.spectrum-labels span{max-width:45%;}
+.spectrum-labels span:last-child{text-align:right;}
+
+/* ---------- stopwatch ---------- */
+.blindzone{
+  background:var(--ink);color:var(--cream);border:3px solid var(--ink);
+  border-radius:14px;box-shadow:var(--shadow);
+  min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:20px;cursor:pointer;
+}
+.blindzone .dots{font-family:'Space Mono',monospace;font-size:52px;font-weight:700;letter-spacing:6px;}
+.resline{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;border-bottom:2px dashed #c9bfa5;font-weight:700;}
+.resline:last-child{border-bottom:none;}
+.resline .mono{font-size:15px;}
+.crown{background:var(--mustard);border:2.5px solid var(--ink);border-radius:8px;padding:1px 8px;font-size:12px;margin-left:8px;}
+
+/* ---------- reveal card (impostor) ---------- */
+.revealcard{
+  min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;text-align:center;cursor:pointer;
+}
+.secretword{font-family:'Archivo Black',sans-serif;font-size:34px;}
+.imposter-tag{font-family:'Archivo Black',sans-serif;font-size:30px;color:var(--red);}
+
+/* ---------- bomb ---------- */
+.bombzone{
+  background:var(--orange);border:3px solid var(--ink);border-radius:14px;box-shadow:var(--shadow);
+  min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:20px;text-align:center;color:var(--cream);
+}
+.bombzone.blown{background:var(--red);}
+.bomb-emoji{font-size:64px;line-height:1;}
+@keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}}
+.shaking .bomb-emoji{animation:shake .3s infinite;}
+@media (prefers-reduced-motion: reduce){.shaking .bomb-emoji{animation:none;}}
+
+/* ---------- act up ---------- */
+.actword{font-family:'Archivo Black',sans-serif;font-size:38px;text-align:center;padding:24px 8px;}
+.timerbar-wrap{border:3px solid var(--ink);border-radius:999px;background:var(--cream);height:26px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);}
+.timerbar{height:100%;background:var(--purple);width:100%;}
+
+.centerstack{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;}
+.spacer{flex:1;}
+select{
+  font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;width:100%;
+  border:3px solid var(--ink);border-radius:12px;padding:12px 14px;background:var(--cream);
+  box-shadow:var(--shadow);appearance:none;
+}
+.label-sm{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block;}
+.scorepop{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%);
+  background:var(--ink);color:var(--cream);border:3px solid var(--cream);
+  border-radius:12px;padding:10px 18px;font-weight:700;z-index:50;display:none;
+  box-shadow:4px 4px 0 rgba(0,0,0,.4);
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ HOME ============ -->
+  <section class="screen on" id="scr-home">
+    <div class="logo-wrap">
+      <h1 class="logo">GAME B<span class="flip">O</span>RED</h1>
+      <div class="sub">One phone · whole crew</div>
+    </div>
+
+    <div class="gamegrid">
+      <button class="gcard g-blue" onclick="WL.open()">
+        <span class="eyebrow">Read minds</span>
+        <h3>Wavelength</h3>
+        <p>Clue the crew onto a hidden spot on the dial.</p>
+      </button>
+      <button class="gcard g-mustard" onclick="SW.open()">
+        <span class="eyebrow">Nerves of steel</span>
+        <h3>Blind Stopwatch</h3>
+        <p>Hit the target time with your eyes off the clock.</p>
+      </button>
+      <button class="gcard g-red" onclick="IMP.open()">
+        <span class="eyebrow">Trust no one</span>
+        <h3>Impostor</h3>
+        <p>Everyone gets the word. One of you doesn't.</p>
+      </button>
+      <button class="gcard g-orange" onclick="BOMB.open()">
+        <span class="eyebrow">Hot potato</span>
+        <h3>Pass the Bomb</h3>
+        <p>Name one, pass it on. Don't be holding it.</p>
+      </button>
+      <button class="gcard g-purple" onclick="ACT.open()">
+        <span class="eyebrow">60 seconds</span>
+        <h3>Act Up</h3>
+        <p>Act or describe as many words as you can.</p>
+      </button>
+      <button class="gcard g-cream" onclick="go('scr-players')">
+        <span class="eyebrow">The crew</span>
+        <h3 id="home-pcount">Players</h3>
+        <p>Roster + running scoreboard for the night.</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ PLAYERS ============ -->
+  <section class="screen" id="scr-players">
+    <div class="topbar">
+      <button class="small backbtn" onclick="go('scr-home')">&larr; Back</button>
+      <span class="gamechip" style="background:var(--cream)">Scoreboard</span>
+    </div>
+    <div class="card">
+      <span class="label-sm">Add player</span>
+      <div class="addrow">
+        <input id="pl-input" type="text" maxlength="14" placeholder="Name" autocomplete="off">
+        <button class="ink" onclick="Players.add()">Add</button>
+      </div>
+    </div>
+    <div class="plist" id="pl-list"></div>
+    <div class="spacer"></div>
+    <button class="wfull red" onclick="Players.resetScores()">Reset all scores</button>
+  </section>
+
+  <!-- ============ WAVELENGTH ============ -->
+  <section class="screen" id="scr-wl">
+    <div class="topbar">
+      <button class="small backbtn" onclick="go('scr-home')">&larr; Exit</button>
+      <span class="gamechip" style="background:var(--blue);color:var(--cream)">Wavelength</span>
+    </div>
+    <div id="wl-body"></div>
+  </section>
+
+  <!-- ============ STOPWATCH ============ -->
+  <section class="screen" id="scr-sw">
+    <div class="topbar">
+      <button class="small backbtn" onclick="go('scr-home')">&larr; Exit</button>
+      <span class="gamechip" style="background:var(--mustard)">Blind Stopwatch</span>
+    </div>
+    <div id="sw-body"></div>
+  </section>
+
+  <!-- ============ IMPOSTOR ============ -->
+  <section class="screen" id="scr-imp">
+    <div class="topbar">
+      <button class="small backbtn" onclick="go('scr-home')">&larr; Exit</button>
+      <span class="gamechip" style="background:var(--red);color:var(--cream)">Impostor</span>
+    </div>
+    <div id="imp-body"></div>
+  </section>
+
+  <!-- ============ BOMB ============ -->
+  <section class="screen" id="scr-bomb">
+    <div class="topbar">
+      <button class="small backbtn" onclick="go('scr-home')">&larr; Exit</button>
+      <span class="gamechip" style="background:var(--orange);color:var(--cream)">Pass the Bomb</span>
+    </div>
+    <div id="bomb-body"></div>
+  </section>
+
+  <!-- ============ ACT UP ============ -->
+  <section class="screen" id="scr-act">
+    <div class="topbar">
+      <button class="small backbtn" onclick="go('scr-home')">&larr; Exit</button>
+      <span class="gamechip" style="background:var(--purple);color:var(--cream)">Act Up</span>
+    </div>
+    <div id="act-body"></div>
+  </section>
+
+</div>
+<div class="scorepop" id="scorepop"></div>
+
+<script>
+/* =================== DATA =================== */
+const SPECTRUMS = [
+["Underrated","Overrated"],["Cold","Hot"],["Bad habit","Good habit"],["Useless superpower","Useful superpower"],
+["Scary animal","Cute animal"],["Guilty pleasure","Genuine pleasure"],["Bad pizza topping","Good pizza topping"],
+["Weak","Strong"],["Dry","Wet"],["Villain","Hero"],["Boring sport","Exciting sport"],["Cheap","Expensive"],
+["Casual","Formal"],["Quiet place","Loud place"],["Easy to learn","Hard to learn"],["Old school","Futuristic"],
+["Bad excuse","Good excuse"],["Small talk","Deep talk"],["Overpaid job","Underpaid job"],["Forgettable","Iconic"],
+["Bad first date spot","Good first date spot"],["Unhealthy","Healthy"],["Soft","Crunchy"],["Nerdy","Cool"],
+["Bad movie sequel","Good movie sequel"],["Weekday activity","Weekend activity"],["Sad song","Hype song"],
+["Skill","Luck"],["Introvert activity","Extrovert activity"],["Bad smell","Good smell"],
+["Something you rent","Something you buy"],["Kids movie","Adults movie"],["Fake sport","Real sport"],
+["Low effort","High effort"],["Bad superpower name","Good superpower name"],["Round","Pointy"],
+["Bad gift","Good gift"],["Ancient","Modern"],["Team sport","Solo sport"],["Dangerous hobby","Safe hobby"],
+["Bad breakfast","Good breakfast"],["Slow animal","Fast animal"],["Mainstream","Niche"],
+["Something to whisper","Something to yell"],["Bad tattoo idea","Good tattoo idea"],["Simple game","Complex game"],
+["Worst chore","Best chore"],["Overhyped tech","Underhyped tech"],["Fictional villain","Real villain"],
+["Bad karaoke song","Good karaoke song"],["Comfortable","Stylish"],["Bad school subject","Good school subject"],
+["Cold food","Hot food"],["Something for beginners","Something for pros"],["Weak flex","Strong flex"]
+];
+
+const WORDS = {
+"Footy & Sport":["Buddy Franklin","LeBron James","Lionel Messi","Cristiano Ronaldo","Max Verstappen","Dustin Martin","Sam Kerr","Israel Adesanya","Novak Djokovic","Patrick Cripps","Steph Curry","Erling Haaland","Kylian Mbappe","Alex Volkanovski","Nick Daicos","Usain Bolt","Charlie Curnow","Lance Stroll","Harry Kane","Tim Cahill"],
+"Food":["Meat pie","Sushi","Parma","Kebab","Butter chicken","Ramen","Vegemite toast","Lamington","Pho","Fairy bread","Halal snack pack","Banh mi","Pavlova","Nuggets","Zinger burger","Dim sims","Carbonara","Tacos","Sausage roll","Bubble tea"],
+"Places":["Melbourne","Bali","Tokyo","Chadstone","New York","The MCG","Gold Coast","Paris","Dubai","School canteen","Bunnings","The dentist","Airport security","Servo at 2am","Centrelink","Ikea","The gym","Cinema","Vegas","Antarctica"],
+"Movies & TV":["Breaking Bad","The Office","Shrek","Spider-Man","Bluey","Oppenheimer","Squid Game","Stranger Things","The Simpsons","Cars","Interstellar","MasterChef","Peaky Blinders","Toy Story","John Wick","The Batman","Frozen","Top Gear","Home and Away","Avatar"],
+"Animals":["Kangaroo","Magpie","Drop bear","Huntsman spider","Blue whale","Penguin","Cassowary","Goldfish","Wombat","Great white shark","Sloth","Pigeon","Dingo","Octopus","Koala","Snake","Seagull","Quokka","Bull ant","Platypus"],
+"Random Stuff":["Wheelie bin","Bluetooth speaker","Esky","Trampoline","Group chat","Speed camera","Myki card","Air fryer","Zooper Dooper","Classmate who never shuts up","School bell","Wi-Fi password","Thongs","Hills hoist","Roundabout","Umbrella","Vape detector","Lawn mower","Charger cable","Water bottle"]
+};
+
+/* =================== STATE =================== */
+const store = {
+  load(){ try{ return JSON.parse(localStorage.getItem('gb-players')||'[]'); }catch(e){ return []; } },
+  save(p){ try{ localStorage.setItem('gb-players', JSON.stringify(p)); }catch(e){} }
+};
+let players = store.load(); // [{name, score}]
+
+function pop(msg){
+  const el = document.getElementById('scorepop');
+  el.textContent = msg; el.style.display='block';
+  clearTimeout(pop._t); pop._t = setTimeout(()=>el.style.display='none', 2200);
+}
+function addScore(name, pts){
+  const p = players.find(x=>x.name===name);
+  if(p){ p.score += pts; store.save(players); }
+}
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  if(id==='scr-players') Players.render();
+  if(id==='scr-home') Players.renderHome();
+  window.scrollTo(0,0);
+}
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function needPlayers(min, body){
+  if(players.length < min){
+    body.innerHTML = `<div class="card centerstack">
+      <h2>Need ${min}+ players</h2>
+      <p class="hint">Set up the crew first — same roster carries into every game.</p>
+      <button class="ink wfull" onclick="go('scr-players')">Add players</button>
+    </div>`;
+    return true;
+  }
+  return false;
+}
+
+/* =================== PLAYERS =================== */
+const Players = {
+  add(){
+    const inp = document.getElementById('pl-input');
+    const name = inp.value.trim();
+    if(!name) return;
+    if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ pop('Already on the roster'); return; }
+    players.push({name, score:0});
+    store.save(players); inp.value=''; this.render();
+  },
+  remove(i){ players.splice(i,1); store.save(players); this.render(); },
+  resetScores(){ players.forEach(p=>p.score=0); store.save(players); this.render(); pop('Scores wiped'); },
+  render(){
+    const list = document.getElementById('pl-list');
+    const sorted = [...players].sort((a,b)=>b.score-a.score);
+    if(!players.length){
+      list.innerHTML = `<div class="card centerstack"><h3>No one here yet</h3><p class="hint">Add everyone playing tonight. Scores follow them across all games.</p></div>`;
+      return;
+    }
+    list.innerHTML = sorted.map(p=>{
+      const i = players.indexOf(p);
+      const lead = sorted[0].score>0 && p.score===sorted[0].score ? ' 👑' : '';
+      return `<div class="prow">
+        <span class="pname">${esc(p.name)}${lead}</span>
+        <span class="pscore">${p.score}</span>
+        <button class="small pdel red" onclick="Players.remove(${i})">✕</button>
+      </div>`;
+    }).join('');
+  },
+  renderHome(){
+    document.getElementById('home-pcount').textContent = players.length ? `Players (${players.length})` : 'Players';
+  }
+};
+document.getElementById('pl-input').addEventListener('keydown', e=>{ if(e.key==='Enter') Players.add(); });
+
+/* =================== WAVELENGTH =================== */
+const WL = {
+  target:50, guess:50, psychicIdx:0, spectrum:null, dragging:false,
+  open(){
+    go('scr-wl');
+    const body = document.getElementById('wl-body');
+    if(needPlayers(2, body)) return;
+    this.psychicIdx = Math.floor(Math.random()*players.length);
+    this.setup();
+  },
+  setup(){
+    const body = document.getElementById('wl-body');
+    const psychic = players[this.psychicIdx % players.length].name;
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">Round setup</span>
+      <h2>${esc(psychic)} is the Psychic</h2>
+      <p class="hint">Only the Psychic looks at the next screen. They'll see a secret target on the dial, then give ONE clue out loud that sits at that spot on the spectrum. No numbers, no pointing.</p>
+      <button class="blue wfull" onclick="WL.showTarget()">Hand me the phone (Psychic)</button>
+    </div>`;
+  },
+  showTarget(){
+    this.spectrum = pick(SPECTRUMS);
+    this.target = 5 + Math.floor(Math.random()*91);
+    const body = document.getElementById('wl-body');
+    body.innerHTML = `<div class="card">
+      <span class="eyebrow">Psychic only 👀</span>
+      <div class="dialwrap" style="margin-top:8px">${this.dialSVG(this.target, true, false)}</div>
+      <div class="spectrum-labels"><span>← ${esc(this.spectrum[0])}</span><span>${esc(this.spectrum[1])} →</span></div>
+      <p class="hint" style="margin-top:12px">Memorise where the target is. Think of your clue, then hide the screen and hit ready.</p>
+      <button class="ink wfull" style="margin-top:12px" onclick="WL.guessPhase()">Got my clue — hide target</button>
+    </div>`;
+  },
+  guessPhase(){
+    this.guess = 50;
+    const body = document.getElementById('wl-body');
+    body.innerHTML = `<div class="card">
+      <span class="eyebrow">Everyone else</span>
+      <h3 style="margin:6px 0 4px">Where does the clue land?</h3>
+      <div class="dialwrap" id="wl-dial">${this.dialSVG(this.guess, false, true)}</div>
+      <div class="spectrum-labels"><span>← ${esc(this.spectrum[0])}</span><span>${esc(this.spectrum[1])} →</span></div>
+      <p class="hint" style="margin-top:12px">Drag the needle. Argue it out as a group, then lock it in.</p>
+      <button class="blue wfull" style="margin-top:12px" onclick="WL.reveal()">Lock it in</button>
+    </div>`;
+    this.bindDial();
+  },
+  updateNeedle(){
+    const svg = document.querySelector('#wl-dial svg');
+    if(svg) document.getElementById('wl-dial').innerHTML = this.dialSVG(this.guess,false,true);
+  },
+  reveal(){
+    const diff = Math.abs(this.guess - this.target);
+    let pts = 0, verdict='Miss. Rough clue or rough crew?';
+    if(diff<=4){ pts=4; verdict='BULLSEYE. Telepathy confirmed.'; }
+    else if(diff<=9){ pts=3; verdict='So close. Solid clue.'; }
+    else if(diff<=15){ pts=2; verdict='In the zone. Not bad.'; }
+    const psychic = players[this.psychicIdx % players.length].name;
+    if(pts>0) addScore(psychic, pts);
+    const body = document.getElementById('wl-body');
+    body.innerHTML = `<div class="card centerstack">
+      <div class="dialwrap" style="width:100%">${this.dialSVG(this.target, true, false, this.guess)}</div>
+      <div class="spectrum-labels" style="width:100%"><span>← ${esc(this.spectrum[0])}</span><span>${esc(this.spectrum[1])} →</span></div>
+      <h2 style="margin-top:6px">${pts>0? '+'+pts+' pts to '+esc(psychic) : 'No points'}</h2>
+      <p class="hint">${verdict} Target was ${this.target}, crew said ${this.guess}.</p>
+      <div class="row" style="width:100%">
+        <button onclick="go('scr-home')">Done</button>
+        <button class="blue" onclick="WL.psychicIdx++; WL.setup()">Next psychic</button>
+      </div>
+    </div>`;
+    if(pts>0) pop(`${psychic} +${pts}`);
+  },
+  dialSVG(val, showTarget, interactive, guessMark){
+    const W=320,H=185,cx=W/2,cy=170,r=140;
+    const a = v => Math.PI - (v/100)*Math.PI;
+    const px = (ang,rad)=> (cx+rad*Math.cos(ang)).toFixed(1);
+    const py = (ang,rad)=> (cy-rad*Math.sin(ang)).toFixed(1);
+    const band=(lo,hi,color)=>{
+      const a1=a(lo),a2=a(hi);
+      return `<path d="M ${px(a1,r)} ${py(a1,r)} A ${r} ${r} 0 0 1 ${px(a2,r)} ${py(a2,r)} L ${px(a2,55)} ${py(a2,55)} A 55 55 0 0 0 ${px(a1,55)} ${py(a1,55)} Z" fill="${color}" stroke="#131F19" stroke-width="2"/>`;
+    };
+    let bands = `<path d="M ${px(Math.PI,r)} ${py(Math.PI,r)} A ${r} ${r} 0 0 1 ${px(0,r)} ${py(0,r)} L ${px(0,55)} ${py(0,55)} A 55 55 0 0 0 ${px(Math.PI,55)} ${py(Math.PI,55)} Z" fill="#E9DFC8" stroke="#131F19" stroke-width="3"/>`;
+    if(showTarget){
+      const t=this.target;
+      bands += band(Math.max(0,t-15),Math.min(100,t+15),'#EFB63C');
+      bands += band(Math.max(0,t-9),Math.min(100,t+9),'#E8802F');
+      bands += band(Math.max(0,t-4),Math.min(100,t+4),'#E24A3B');
+    }
+    const na=a(val);
+    const needle = `<line x1="${cx}" y1="${cy}" x2="${px(na,r-8)}" y2="${py(na,r-8)}" stroke="#131F19" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="${cx}" cy="${cy}" r="14" fill="#131F19"/>`;
+    let gm='';
+    if(guessMark!==undefined){
+      const ga=a(guessMark);
+      gm = `<line x1="${px(ga,58)}" y1="${py(ga,58)}" x2="${px(ga,r-4)}" y2="${py(ga,r-4)}" stroke="#3E8FCB" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 7"/>`;
+    }
+    return `<svg viewBox="0 0 ${W} ${H+8}" ${interactive?'id="wl-svg"':''}>${bands}${gm}${needle}</svg>`;
+  },
+  bindDial(){
+    const wrap = document.getElementById('wl-dial');
+    if(!wrap) return;
+    wrap.style.touchAction = 'none';
+    const move = e =>{
+      const rect = wrap.getBoundingClientRect();
+      const scale = 320/rect.width;
+      const x = (e.clientX-rect.left)*scale, y = (e.clientY-rect.top)*scale;
+      const ang = Math.atan2(170-y, x-160);
+      let v = Math.round((1 - ang/Math.PI)*100);
+      this.guess = Math.max(0, Math.min(100, v));
+      wrap.innerHTML = this.dialSVG(this.guess,false,true);
+    };
+    wrap.addEventListener('pointerdown', e=>{ this.dragging=true; move(e); e.preventDefault(); });
+    wrap.addEventListener('pointermove', e=>{ if(this.dragging){ move(e); e.preventDefault(); } });
+    window.addEventListener('pointerup', ()=> this.dragging=false);
+  }
+};
+
+/* =================== BLIND STOPWATCH =================== */
+const SW = {
+  target:0, order:[], idx:0, results:[], t0:0, running:false, tick:null,
+  open(){
+    go('scr-sw');
+    const body = document.getElementById('sw-body');
+    if(needPlayers(2, body)) return;
+    this.target = (Math.floor(Math.random()*121)+30)/10; // 3.0 – 15.0s
+    this.order = shuffle(players.map(p=>p.name));
+    this.idx = 0; this.results = [];
+    this.intro();
+  },
+  intro(){
+    const body = document.getElementById('sw-body');
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">Target time</span>
+      <div class="big-num">${this.target.toFixed(1)}s</div>
+      <p class="hint">Each player starts the clock, counts in their head (no phones, no counting out loud from the crowd), and stops it blind. Closest to the target takes the round.</p>
+      <button class="mustard wfull" onclick="SW.playerUp()">Start — ${esc(this.order[0])} first</button>
+    </div>`;
+  },
+  playerUp(){
+    const name = this.order[this.idx];
+    const body = document.getElementById('sw-body');
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">Target: ${this.target.toFixed(1)}s</span>
+      <h2>${esc(name)}, you're up</h2>
+      <p class="hint">Tap the black box to start. Tap again to stop. You won't see the time running.</p>
+    </div>
+    <div class="blindzone" id="sw-zone" role="button" aria-label="stopwatch">
+      <span class="eyebrow" style="color:#8fa89b" id="sw-state">TAP TO START</span>
+      <div class="dots" id="sw-dots">— · —</div>
+    </div>`;
+    const zone = document.getElementById('sw-zone');
+    zone.addEventListener('pointerdown', ()=> SW.tap());
+  },
+  tap(){
+    if(!this.running){
+      this.running = true;
+      this.t0 = performance.now();
+      document.getElementById('sw-state').textContent = 'RUNNING… TAP TO STOP';
+      let flip = false;
+      this.tick = setInterval(()=>{
+        flip=!flip;
+        const d=document.getElementById('sw-dots');
+        if(d) d.textContent = flip? '· — ·' : '— · —';
+      }, 400);
+    } else {
+      const elapsed = (performance.now()-this.t0)/1000;
+      clearInterval(this.tick);
+      this.running = false;
+      this.results.push({name:this.order[this.idx], time:elapsed});
+      this.idx++;
+      if(this.idx < this.order.length) this.between(elapsed);
+      else this.final();
+    }
+  },
+  between(elapsed){
+    const prev = this.order[this.idx-1];
+    const next = this.order[this.idx];
+    const body = document.getElementById('sw-body');
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">${esc(prev)} locked in</span>
+      <div class="big-num" style="font-size:44px">${elapsed.toFixed(2)}s</div>
+      <p class="hint">Target is ${this.target.toFixed(1)}s. No pressure, ${esc(next)}.</p>
+      <button class="mustard wfull" onclick="SW.playerUp()">${esc(next)}'s turn</button>
+    </div>`;
+  },
+  final(){
+    const ranked = [...this.results].sort((a,b)=> Math.abs(a.time-this.target)-Math.abs(b.time-this.target));
+    const winner = ranked[0];
+    addScore(winner.name, 3);
+    pop(`${winner.name} +3`);
+    const body = document.getElementById('sw-body');
+    body.innerHTML = `<div class="card">
+      <span class="eyebrow">Target: ${this.target.toFixed(1)}s</span>
+      <h2 style="margin:6px 0 10px">Results</h2>
+      ${ranked.map((r,i)=>`<div class="resline">
+        <span>${i+1}. ${esc(r.name)}${i===0?'<span class="crown">+3 pts</span>':''}</span>
+        <span class="mono">${r.time.toFixed(2)}s <span style="opacity:.55">(${(r.time-this.target>=0?'+':'')}${(r.time-this.target).toFixed(2)})</span></span>
+      </div>`).join('')}
+      <div class="row" style="margin-top:14px">
+        <button onclick="go('scr-home')">Done</button>
+        <button class="mustard" onclick="SW.open()">New target</button>
+      </div>
+    </div>`;
+  }
+};
+
+/* =================== IMPOSTOR =================== */
+const IMP = {
+  order:[], impostors:new Set(), word:'', category:'', idx:0, shown:false,
+  open(){
+    go('scr-imp');
+    const body = document.getElementById('imp-body');
+    if(needPlayers(3, body)) return;
+    const catOpts = Object.keys(WORDS).map(c=>`<option>${c}</option>`).join('');
+    const maxImp = players.length >= 6 ? 2 : 1;
+    body.innerHTML = `<div class="card">
+      <span class="label-sm">Category</span>
+      <select id="imp-cat"><option>Random</option>${catOpts}</select>
+      <div style="height:12px"></div>
+      <span class="label-sm">Impostors</span>
+      <div class="row">
+        <button class="ink" id="imp-1" onclick="IMP.setN(1)">1 impostor</button>
+        <button id="imp-2" ${maxImp<2?'disabled':''} onclick="IMP.setN(2)">2 impostors</button>
+      </div>
+      <p class="hint" style="margin-top:12px">Phone gets passed around. Everyone secretly checks their card — one of you won't know the word. Talk it out, then vote IRL on who's faking.</p>
+      <button class="red wfull" style="margin-top:12px" onclick="IMP.start()">Deal the cards</button>
+    </div>`;
+    this.nImp = 1;
+  },
+  nImp:1,
+  setN(n){
+    this.nImp = n;
+    document.getElementById('imp-1').className = n===1?'ink':'';
+    document.getElementById('imp-2').className = n===2?'ink':'';
+  },
+  start(){
+    let cat = document.getElementById('imp-cat').value;
+    if(cat==='Random') cat = pick(Object.keys(WORDS));
+    this.category = cat;
+    this.word = pick(WORDS[cat]);
+    this.order = shuffle(players.map(p=>p.name));
+    const shuffled = shuffle(this.order);
+    this.impostors = new Set(shuffled.slice(0, this.nImp));
+    this.idx = 0;
+    this.passTo();
+  },
+  passTo(){
+    this.shown = false;
+    const name = this.order[this.idx];
+    const body = document.getElementById('imp-body');
+    body.innerHTML = `<div class="card revealcard" id="imp-card">
+      <span class="eyebrow">Card ${this.idx+1} of ${this.order.length}</span>
+      <h2>Pass to ${esc(name)}</h2>
+      <p class="hint">Tap and hold to peek. Let go before anyone sees.</p>
+    </div>`;
+    const card = document.getElementById('imp-card');
+    card.addEventListener('pointerdown', ()=> IMP.peek(true));
+    card.addEventListener('pointerup', ()=> IMP.peek(false));
+    card.addEventListener('pointerleave', ()=> IMP.peek(false));
+  },
+  peek(down){
+    const name = this.order[this.idx];
+    const card = document.getElementById('imp-card');
+    if(!card) return;
+    if(down){
+      this.shown = true;
+      if(this.impostors.has(name)){
+        card.innerHTML = `<span class="eyebrow">Category: ${esc(this.category)}</span>
+          <div class="imposter-tag">IMPOSTOR</div>
+          <p class="hint">You don't get the word. Blend in. Nod a lot.</p>`;
+      } else {
+        card.innerHTML = `<span class="eyebrow">Category: ${esc(this.category)}</span>
+          <div class="secretword">${esc(this.word)}</div>
+          <p class="hint">That's the word. Keep it subtle.</p>`;
+      }
+    } else if(this.shown){
+      this.idx++;
+      if(this.idx < this.order.length) this.passTo();
+      else this.discuss();
+    }
+  },
+  discuss(){
+    const body = document.getElementById('imp-body');
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">Category: ${esc(this.category)}</span>
+      <h2>Talk. Accuse. Vote.</h2>
+      <p class="hint">Go around — everyone says one word or vibe related to the secret word. Too vague? Sus. Too specific? Also sus. Vote someone out, then reveal.</p>
+      <button class="red wfull" onclick="IMP.revealScreen()">Reveal impostor</button>
+    </div>`;
+  },
+  revealScreen(){
+    const imps = [...this.impostors];
+    const body = document.getElementById('imp-body');
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">The word was</span>
+      <div class="secretword">${esc(this.word)}</div>
+      <h3 style="color:var(--red)">Impostor${imps.length>1?'s':''}: ${imps.map(esc).join(' & ')}</h3>
+      <p class="hint">Did the crew catch them? Score it:</p>
+      <div class="row" style="width:100%">
+        <button onclick="IMP.score(false)">Crew caught them</button>
+        <button class="red" onclick="IMP.score(true)">Impostor survived</button>
+      </div>
+    </div>`;
+  },
+  score(impWon){
+    if(impWon){
+      this.impostors.forEach(n=> addScore(n,3));
+      pop(`Impostor +3 each`);
+    } else {
+      this.order.forEach(n=>{ if(!this.impostors.has(n)) addScore(n,1); });
+      pop('Crew +1 each');
+    }
+    const body = document.getElementById('imp-body');
+    body.innerHTML = `<div class="card centerstack">
+      <h2>${impWon? 'Impostor takes it 😈' : 'Crew wins 🕵️'}</h2>
+      <div class="row" style="width:100%">
+        <button onclick="go('scr-home')">Done</button>
+        <button class="red" onclick="IMP.open()">Run it back</button>
+      </div>
+    </div>`;
+  }
+};
+
+/* =================== PASS THE BOMB =================== */
+const BOMB = {
+  timer:null, category:'',
+  open(){
+    go('scr-bomb');
+    const body = document.getElementById('bomb-body');
+    if(needPlayers(2, body)) return;
+    const cats = ['Footy teams','Fast food chains','Countries','Animals','Car brands','Rappers / artists','Movies','Pizza toppings','Things at school','Excuses for being late','Apps on your phone','Things in a servo','Sports','Chocolate bars','Boys names','Superheroes','Things that are cold','Jobs','Songs everyone knows','Things in a gym'];
+    this.category = pick(cats);
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">Category</span>
+      <h2>${esc(this.category)}</h2>
+      <p class="hint">Hold the phone, say one answer, pass it on. Fuse length is random — if it blows in your hands, you cop it. No repeats, no stalling.</p>
+      <button class="orange wfull" onclick="BOMB.light()">Light the fuse 💣</button>
+    </div>`;
+  },
+  light(){
+    const fuse = 15000 + Math.random()*40000; // 15–55s
+    const body = document.getElementById('bomb-body');
+    body.innerHTML = `<div class="card centerstack" style="padding:12px">
+      <span class="eyebrow">Category</span>
+      <h3>${esc(this.category)}</h3>
+    </div>
+    <div class="bombzone shaking" id="bomb-zone">
+      <div class="bomb-emoji">💣</div>
+      <h2 class="cream-text">TICK TICK TICK</h2>
+      <p style="font-weight:700;font-size:13px;opacity:.9">Answer &amp; pass. Fast.</p>
+    </div>`;
+    if(navigator.vibrate) navigator.vibrate(80);
+    this.timer = setTimeout(()=> this.boom(), fuse);
+  },
+  boom(){
+    if(navigator.vibrate) navigator.vibrate([200,80,300]);
+    const zone = document.getElementById('bomb-zone');
+    if(!zone) return;
+    zone.classList.remove('shaking'); zone.classList.add('blown');
+    zone.innerHTML = `<div class="bomb-emoji">💥</div><h2 class="cream-text">BOOM!</h2>
+      <p style="font-weight:700">Whoever's holding it — everyone else scores.</p>`;
+    const body = document.getElementById('bomb-body');
+    body.insertAdjacentHTML('beforeend', `<div class="card">
+      <span class="label-sm">Who was holding it?</span>
+      <div class="plist">${players.map(p=>`<button class="wfull" onclick="BOMB.loser('${esc(p.name).replace(/'/g,"\\'")}')">${esc(p.name)}</button>`).join('')}</div>
+    </div>`);
+  },
+  loser(name){
+    players.forEach(p=>{ if(p.name!==name) addScore(p.name,1); });
+    pop(`Everyone but ${name} +1`);
+    const body = document.getElementById('bomb-body');
+    body.innerHTML = `<div class="card centerstack">
+      <h2>${esc(name)} blew up 💀</h2>
+      <p class="hint">Everyone else banks +1.</p>
+      <div class="row" style="width:100%">
+        <button onclick="go('scr-home')">Done</button>
+        <button class="orange" onclick="BOMB.open()">New round</button>
+      </div>
+    </div>`;
+  }
+};
+
+/* =================== ACT UP =================== */
+const ACT = {
+  deck:[], idx:0, score:0, actorIdx:0, timer:null, end:0, mode:'Describe',
+  open(){
+    go('scr-act');
+    const body = document.getElementById('act-body');
+    if(needPlayers(2, body)) return;
+    this.actorIdx = Math.floor(Math.random()*players.length);
+    this.setup();
+  },
+  setup(){
+    const actor = players[this.actorIdx % players.length].name;
+    const catOpts = Object.keys(WORDS).map(c=>`<option>${c}</option>`).join('');
+    const body = document.getElementById('act-body');
+    body.innerHTML = `<div class="card">
+      <span class="eyebrow">Up next</span>
+      <h2 style="margin:4px 0 10px">${esc(actor)}</h2>
+      <span class="label-sm">Category</span>
+      <select id="act-cat"><option>Random</option>${catOpts}</select>
+      <div style="height:12px"></div>
+      <span class="label-sm">Mode</span>
+      <div class="row">
+        <button class="ink" id="act-m1" onclick="ACT.setMode('Describe')">Describe it</button>
+        <button id="act-m2" onclick="ACT.setMode('Act')">Act it (silent)</button>
+      </div>
+      <p class="hint" style="margin-top:12px">60 seconds. Get the crew to guess as many as you can. +1 point per correct. Saying the word = skip it, cheater.</p>
+      <button class="purple wfull" style="margin-top:12px" onclick="ACT.start()">Start 60s</button>
+    </div>`;
+  },
+  setMode(m){
+    this.mode = m;
+    document.getElementById('act-m1').className = m==='Describe'?'ink':'';
+    document.getElementById('act-m2').className = m==='Act'?'ink':'';
+  },
+  start(){
+    let cat = document.getElementById('act-cat').value;
+    if(cat==='Random') cat = pick(Object.keys(WORDS));
+    this.deck = shuffle(WORDS[cat]);
+    this.idx = 0; this.score = 0;
+    this.end = performance.now() + 60000;
+    this.renderPlay(cat);
+    this.timer = setInterval(()=> this.tickUI(), 100);
+  },
+  renderPlay(cat){
+    const body = document.getElementById('act-body');
+    body.innerHTML = `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="eyebrow">${esc(cat)} · ${this.mode}</span>
+        <span class="mono" id="act-clock" style="font-weight:700">60.0</span>
+      </div>
+      <div class="timerbar-wrap" style="margin-top:8px"><div class="timerbar" id="act-bar"></div></div>
+      <div class="actword" id="act-word">${esc(this.deck[this.idx])}</div>
+      <div class="row">
+        <button onclick="ACT.next(false)">Skip</button>
+        <button class="purple" onclick="ACT.next(true)">Got it +1</button>
+      </div>
+      <p class="hint" style="text-align:center;margin-top:10px">Score: <b id="act-score">0</b></p>
+    </div>`;
+  },
+  tickUI(){
+    const left = Math.max(0, this.end - performance.now());
+    const clock = document.getElementById('act-clock');
+    const bar = document.getElementById('act-bar');
+    if(clock) clock.textContent = (left/1000).toFixed(1);
+    if(bar) bar.style.width = (left/60000*100)+'%';
+    if(left<=0) this.finish();
+  },
+  next(got){
+    if(got) this.score++;
+    this.idx = (this.idx+1) % this.deck.length;
+    if(this.idx===0) this.deck = shuffle(this.deck);
+    const w = document.getElementById('act-word');
+    const s = document.getElementById('act-score');
+    if(w) w.textContent = this.deck[this.idx];
+    if(s) s.textContent = this.score;
+  },
+  finish(){
+    clearInterval(this.timer);
+    if(navigator.vibrate) navigator.vibrate(200);
+    const actor = players[this.actorIdx % players.length].name;
+    if(this.score>0) addScore(actor, this.score);
+    pop(`${actor} +${this.score}`);
+    const body = document.getElementById('act-body');
+    body.innerHTML = `<div class="card centerstack">
+      <span class="eyebrow">Time's up</span>
+      <div class="big-num">${this.score}</div>
+      <h3>+${this.score} pts to ${esc(actor)}</h3>
+      <div class="row" style="width:100%">
+        <button onclick="go('scr-home')">Done</button>
+        <button class="purple" onclick="ACT.actorIdx++; ACT.setup()">Next player</button>
+      </div>
+    </div>`;
+  }
+};
+
+Players.renderHome();
+</script>
+</body>
+</html>
